@@ -1,0 +1,39 @@
+import numpy as np
+
+def candidate_elimination(concepts, target):
+    specific_h = concepts[0].copy()
+    general_h = [["?" for _ in range(len(specific_h))]]
+
+    for i, h in enumerate(concepts):
+        if target[i] == "Yes":  # Positive example
+            for x in range(len(specific_h)):
+                if h[x] != specific_h[x]:
+                    specific_h[x] = "?"
+                    general_h[0][x] = "?"
+        else:  # Negative example
+            for x in range(len(specific_h)):
+                if h[x] != specific_h[x]:
+                    general_h[0][x] = specific_h[x]
+                else:
+                    general_h[0][x] = "?"
+
+    # Remove fully '?' hypothesis from general set if present
+    general_h = [g for g in general_h if g != ["?" for _ in range(len(specific_h))]]
+
+    return specific_h, general_h
+
+
+# Example
+concepts = np.array([
+    ['Sunny','Warm','Normal','Strong','Warm','Same'],
+    ['Sunny','Warm','High','Strong','Warm','Same'],
+    ['Rainy','Cold','High','Strong','Warm','Change'],
+    ['Sunny','Warm','High','Strong','Cool','Change']
+])
+
+target = np.array(['Yes','Yes','No','Yes'])
+
+s_final, g_final = candidate_elimination(concepts, target)
+
+print("Final Specific Hypothesis:", s_final)
+print("Final General Hypothesis:", g_final)
