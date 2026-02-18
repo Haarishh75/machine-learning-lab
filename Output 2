@@ -1,0 +1,11 @@
+Decision Tree: 
+{0: {
+    'Sunny': 'No',
+    'Overcast': 'Yes',
+    'Rain': {
+        3: {
+            'Weak': 'Yes',
+            'Strong': 'No'
+        }
+    }
+}}
