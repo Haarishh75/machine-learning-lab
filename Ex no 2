@@ -1,0 +1,67 @@
+import math
+from collections import Counter
+
+# Calculate entropy
+def entropy(data):
+    labels = [row[-1] for row in data]
+    total = len(labels)
+    counts = Counter(labels)
+    return -sum((c/total) * math.log2(c/total) for c in counts.values())
+
+# Information Gain
+def info_gain(data, attr_index):
+    total_entropy = entropy(data)
+    total = len(data)
+    values = set(row[attr_index] for row in data)
+    
+    weighted_entropy = 0
+    for v in values:
+        subset = [row for row in data if row[attr_index] == v]
+        weighted_entropy += (len(subset)/total) * entropy(subset)
+    
+    return total_entropy - weighted_entropy
+
+# ID3 Algorithm
+def id3(data, attributes):
+    labels = [row[-1] for row in data]
+    
+    # If all labels same → return label
+    if labels.count(labels[0]) == len(labels):
+        return labels[0]
+    
+    # If no attributes left → return majority label
+    if not attributes:
+        return Counter(labels).most_common(1)[0][0]
+    
+    # Choose best attribute
+    gains = [info_gain(data, i) for i in attributes]
+    best_attr = attributes[gains.index(max(gains))]
+    
+    tree = {best_attr: {}}
+    values = set(row[best_attr] for row in data)
+    
+    for v in values:
+        subset = [row for row in data if row[best_attr] == v]
+        if not subset:
+            tree[best_attr][v] = Counter(labels).most_common(1)[0][0]
+        else:
+            remaining_attrs = [i for i in attributes if i != best_attr]
+            tree[best_attr][v] = id3(subset, remaining_attrs)
+    
+    return tree
+
+
+# Example dataset: [Outlook, Temp, Humidity, Wind, Play]
+data = [
+    ['Sunny','Hot','High','Weak','No'],
+    ['Sunny','Hot','High','Strong','No'],
+    ['Overcast','Hot','High','Weak','Yes'],
+    ['Rain','Mild','High','Weak','Yes'],
+    ['Rain','Cool','Normal','Weak','Yes'],
+    ['Rain','Cool','Normal','Strong','No'],
+]
+
+attributes = [0,1,2,3]  # attribute indices
+
+tree = id3(data, attributes)
+print("Decision Tree:", tree)
